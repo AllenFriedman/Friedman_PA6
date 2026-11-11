@@ -1,9 +1,13 @@
 #include <stdbool.h>
 #include <stdio.h>
+
+//  Size constants
 #define BOARD_SIZE 9
 #define MAX_SHIPS 5
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
+
+// Enums
 // Defines the type of ship
 typedef enum {
     CARRIER, 
@@ -12,6 +16,7 @@ typedef enum {
     SUBMARINE, 
     DESTROYER
 } ship_t;
+// CPU logic state machine
 typedef enum{
     SEARCHING,
     FOUND_SHIP,
@@ -20,6 +25,8 @@ typedef enum{
     REVERSE_FROM_ORIGIN,
     RESET
 } cpu_logic_t;
+
+// Ship definition
 typedef struct ship{
     ship_t ship_type;
     int size;
@@ -28,23 +35,33 @@ typedef struct ship{
     int column;
     char symbol;
 } Ship;
+
+// Board definition (Imagine two grids stacked, one visible and the other is used for logic)
 typedef struct board{
     char visible_grid[BOARD_SIZE][BOARD_SIZE];
     char hidden_grid[BOARD_SIZE][BOARD_SIZE];
     Ship ships[MAX_SHIPS];
 } Board;
+
+// Player definition
 typedef struct player{
     Board board;
     char name[20];
     bool has_won;
 
 } Player;
+
+// CPU definition
 typedef struct cpu{
     Board board;
     cpu_logic_t cpu_logic;
     bool has_won;
 } CPU;
 Ship init_carrier(void);
+Ship init_battleship(void);
+Ship init_cruiser(void);
+Ship init_submarine(void);
+Ship init_destroyer(void);
 void random_place_ship(char hidden_grid[9][9], Ship* ship);
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
@@ -59,7 +76,6 @@ int get_user_int(void);
 char get_user_char(void);
 int menu_choice(void);
 
-void add_players(int amount_of_players, Player players[]);
 int get_score(Player* player, int category);
 void set_score(Player* player, int category, int score);
 int calculate_score(int dice[], int category);

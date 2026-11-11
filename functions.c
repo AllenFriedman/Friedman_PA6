@@ -4,26 +4,78 @@
 #include <time.h>   
 #include "functions.h"
 
+// Defines Syntax Tools
 #define RED   "\033[31m"
 #define GREEN "\033[32m"
-#define BLUE  "\033[34m"
-#define RESET "\033[0m"
-#define BOLD  "\033[1m"
+#define BLUE "\033[34m"
 #define GRAY  "\033[90m"
+#define BOLD  "\033[1m"
+#define RESET "\033[0m"
 
+// Defines ship sizes
 #define CARRIER_SIZE 5;
+#define BATTLESHIP_SIZE 4;
+#define CRUISER_SIZE 3;
+#define SUBMARINE_SIZE 3;
+#define DESTROYER_SIZE 2;
 
+// Initializes carrier ship
 Ship init_carrier(void){
     Ship carrier = {0};
-    carrier.ship_type = CARRIER;
-    carrier.size = CARRIER_SIZE;
     carrier.ship_type = CARRIER;
     carrier.size = CARRIER_SIZE;
     carrier.hits = 0;
     carrier.row = -1;
     carrier.column = -1;
-    carrier.symbol = 'X';
+    carrier.symbol = 'C';
     return carrier;
+
+}
+
+Ship init_battleship(void){
+    Ship battleship = {0};
+    battleship.ship_type = BATTLESHIP;
+    battleship.size = BATTLESHIP_SIZE;
+    battleship.hits = 0;
+    battleship.row = -1;
+    battleship.column = -1;
+    battleship.symbol = 'B';
+    return battleship;
+
+}
+
+Ship init_cruiser(void){
+    Ship cruiser = {0};
+    cruiser.ship_type = CRUISER;
+    cruiser.size = CRUISER_SIZE;
+    cruiser.hits = 0;
+    cruiser.row = -1;
+    cruiser.column = -1;
+    cruiser.symbol = 'c';
+    return cruiser;
+
+}
+
+Ship init_submarine(void){
+    Ship submarine = {0};
+    submarine.ship_type = SUBMARINE;
+    submarine.size = SUBMARINE_SIZE;
+    submarine.hits = 0;
+    submarine.row = -1;
+    submarine.column = -1;
+    submarine.symbol = 's';
+    return submarine;
+
+}
+Ship init_destroyer(void){
+    Ship destroyer = {0};
+    destroyer.ship_type = DESTROYER;
+    destroyer.size = DESTROYER_SIZE;
+    destroyer.hits = 0;
+    destroyer.row = -1;
+    destroyer.column = -1;
+    destroyer.symbol = 'd';
+    return destroyer;
 
 }
 
