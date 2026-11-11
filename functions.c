@@ -78,6 +78,24 @@ Ship init_destroyer(void){
     return destroyer;
 
 }
+// Inits all ships for a board
+Ships init_ships(void){
+    Ships ships = {0};
+    ships.ships[0] = init_carrier();
+    ships.ships[1] = init_battleship();
+    ships.ships[2] = init_cruiser();
+    ships.ships[3] = init_submarine();
+    ships.ships[4] = init_destroyer();
+    return ships;
+
+}
+ Board init_board(void){
+    Board board = {0};
+    set_board(board.visible_grid);
+    set_board(board.hidden_grid);
+    board.ships = init_ships();
+    return board;
+ }
 
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]){
@@ -303,27 +321,7 @@ void clear_screen(void) {
 
 
 
-//prints menu to console
-void print_menu_choices(void) {
-    printf("1. Print game rules\n");
-    printf("2. Start a game of Yahtzee\n");
-    printf("3. Exit\n");
-}
-//prints table to console
-void print_table(void) {
-    printf(" 1. Sum of 1's         7. Three-of-a-kind\n");
-    printf(" 2. Sum of 2's         8. Four-of-a-kind\n");
-    printf(" 3. Sum of 3's         9. Full house\n");
-    printf(" 4. Sum of 4's        10. Small straight\n");
-    printf(" 5. Sum of 5's        11. Large straight\n");
-    printf(" 6. Sum of 6's        12. Yahtzee\n");
-    printf("                      13. Chance\n");
-}
 
-// Gets choice for menu
-int menu_choice(void) {
-    return 0;
-}
 /*
 //automatically adds players (was gonna be able to add 1-4)
 void add_players(int amount_of_players, Player players[]) {

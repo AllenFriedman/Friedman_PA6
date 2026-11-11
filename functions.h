@@ -36,11 +36,15 @@ typedef struct ship{
     char symbol;
 } Ship;
 
+typedef struct ships{
+    Ship ships[MAX_SHIPS];
+} Ships;
+
 // Board definition (Imagine two grids stacked, one visible and the other is used for logic)
 typedef struct board{
     char visible_grid[BOARD_SIZE][BOARD_SIZE];
     char hidden_grid[BOARD_SIZE][BOARD_SIZE];
-    Ship ships[MAX_SHIPS];
+    Ships ships;
 } Board;
 
 // Player definition
@@ -62,6 +66,8 @@ Ship init_battleship(void);
 Ship init_cruiser(void);
 Ship init_submarine(void);
 Ship init_destroyer(void);
+Ships init_ships(void);
+Board init_board(void);
 void random_place_ship(char hidden_grid[9][9], Ship* ship);
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
