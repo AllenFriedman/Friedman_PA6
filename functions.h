@@ -68,6 +68,8 @@ Ship init_submarine(void);
 Ship init_destroyer(void);
 Ships init_ships(void);
 Board init_board(void);
+Player init_player(const char name[20]);
+CPU init_cpu(void);
 void random_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship);
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
@@ -82,9 +84,6 @@ int get_user_int(void);
 char get_user_char(void);
 int menu_choice(void);
 
-int get_score(Player* player, int category);
-void set_score(Player* player, int category, int score);
-int calculate_score(int dice[], int category);
 void play_turn(Player* player, int round);
 void run(void);
 
