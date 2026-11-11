@@ -15,8 +15,8 @@ Lab 9
 
 int main(void) {
     srand((unsigned int)time(NULL)); //makes random work
-    char game_board[9][9];
-    char logic_board[9][9];
+    char game_board[BOARD_SIZE][BOARD_SIZE];
+    char logic_board[BOARD_SIZE][BOARD_SIZE];
     Ship carrier = init_carrier();
     
     set_board(game_board);

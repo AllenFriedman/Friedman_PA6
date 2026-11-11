@@ -100,7 +100,7 @@ Ships init_ships(void){
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]){
     for(int i = 0; i < BOARD_SIZE; i++){
-        for(int j = 0; j < 9; j++){
+        for(int j = 0; j < BOARD_SIZE; j++){
             grid[i][j] = '~';
         }
     }
@@ -128,6 +128,8 @@ int decode_character(char character){
         return 7;
     case 'I':
         return 8;
+    case 'J':
+        return 9;
     
     default:
         return -1;
@@ -141,8 +143,8 @@ void attack_board(char visible_grid[BOARD_SIZE][BOARD_SIZE], char hidden_grid[BO
 
     do{
         scanf("%d %c", &row, &column);
-        is_row_valid =  (row > 0 && row <= 9);
-        is_column_valid = (column >= 'A' && column <= 'I') || (column >= 'a' && column <= 'i');
+        is_row_valid =  (row > 0 && row <= BOARD_SIZE);
+        is_column_valid = (column >= 'A' && column <= 'J') || (column >= 'a' && column <= 'j');
         if(!(is_column_valid && is_row_valid)){
             printf("Invalid cell, enter an apropiate number and letter: ");
             continue;
@@ -159,10 +161,15 @@ void attack_board(char visible_grid[BOARD_SIZE][BOARD_SIZE], char hidden_grid[BO
     visible_grid[row - 1][decode_character(column)] = hidden_grid[row - 1][decode_character(column)] == 'X' ? 'X': 'O';
 }
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]){
-    printf(BOLD"   A  B  C  D  E  F  G  H  I\n"RESET);
+    printf(BOLD"    A  B  C  D  E  F  G  H  I  J \n"RESET);
     for(int i = 0; i < BOARD_SIZE; i++){
-        printf(BOLD"%d "RESET, i + 1);
+        if(i + 1 < 10){
+            printf(BOLD" %d "RESET, i + 1);
 
+        }
+        else{
+            printf(BOLD"%d "RESET, i + 1);
+        }
         for(int j = 0; j < BOARD_SIZE; j++){
             switch(grid[i][j]){
             case '~':
@@ -190,7 +197,7 @@ void random_attack_board(char grid[BOARD_SIZE][BOARD_SIZE]){
             row = rand() % BOARD_SIZE;
             column = rand() % BOARD_SIZE;
 
-        }while(grid[row][column] == 'O');
+        } while(grid[row][column] != '~' && grid[row][column] != 'O');
 
         
         grid[row][column] = 'O';

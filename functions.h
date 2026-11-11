@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 //  Size constants
-#define BOARD_SIZE 9
+#define BOARD_SIZE 10
 #define MAX_SHIPS 5
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
@@ -68,7 +68,7 @@ Ship init_submarine(void);
 Ship init_destroyer(void);
 Ships init_ships(void);
 Board init_board(void);
-void random_place_ship(char hidden_grid[9][9], Ship* ship);
+void random_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship);
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]);
