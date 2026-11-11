@@ -4,6 +4,7 @@
 #include <time.h>   
 #include <stdlib.h>
 #include "functions.h"
+#include <string.h>
 
 // Defines Syntax Tools
 #define RED   "\033[31m"
@@ -109,6 +110,7 @@ CPU init_cpu(void){
     cpu.board = init_board();
     cpu.cpu_logic = SEARCHING;
     cpu.has_won = false;
+    return cpu;
 }
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]){
@@ -123,25 +125,25 @@ int decode_character(char character){
     character = (character > 'Z') ? character - 32 : character;
     switch (character)
     {
-    case 'A':
+    case 'A': // Row A
         return 0;
-    case 'B':
+    case 'B': // Row B
         return 1;
-    case 'C':
+    case 'C': // Row C
         return 2;
-    case 'D':
+    case 'D': // Row D
         return 3;
-    case 'E':
+    case 'E': // Row E
         return 4;
-    case 'F':
+    case 'F': // Row F
         return 5;
-    case 'G':
+    case 'G': // Row G
         return 6;
-    case 'H':
+    case 'H': // Row H
         return 7;
-    case 'I':
+    case 'I': // Row I
         return 8;
-    case 'J':
+    case 'J': // Row J
         return 9;
     
     default:
@@ -149,13 +151,21 @@ int decode_character(char character){
     }
 }
 void attack_board(char visible_grid[BOARD_SIZE][BOARD_SIZE], char hidden_grid[BOARD_SIZE][BOARD_SIZE]){
-    int row = 0;
+    int row = 0, result = 0, ch;
     bool is_valid_choice = false, is_row_valid = false, is_column_valid = false, is_repeated_attack = false;
     char column = '\0';
+    char buffer[100] = "";
     printf("Attack your opponent by choosing a cell to attack (enter row then column; for example 4A): ");
 
     do{
-        scanf("%d %c", &row, &column);
+        if(fgets(buffer, sizeof(buffer),stdin) == NULL){
+            return;
+        }
+        char extra = '\0';
+        if(sscanf(buffer,"%d %c %c", &row, &column, &extra) != 2){
+                printf("Invalid cell, enter the coordinates in the proper format: ");
+                continue;
+            }
         is_row_valid =  (row > 0 && row <= BOARD_SIZE);
         is_column_valid = (column >= 'A' && column <= 'J') || (column >= 'a' && column <= 'j');
         if(!(is_column_valid && is_row_valid)){
