@@ -160,7 +160,7 @@ int decode_character(char character){
     }
 }
 void attack_board(char visible_grid[BOARD_SIZE][BOARD_SIZE], char hidden_grid[BOARD_SIZE][BOARD_SIZE]){
-    int row = 0, result = 0, ch;
+    int row = 0;
     bool is_valid_choice = false, is_row_valid = false, is_column_valid = false, is_repeated_attack = false;
     char column = '\0';
     char buffer[100] = "";

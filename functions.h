@@ -37,7 +37,7 @@ typedef struct ship{
 } Ship;
 
 typedef struct ships{
-    Ship ship[MAX_SHIPS];
+    Ship ship[MAX_SHIPS]; // went against traditonal array naming conventions to simplify access --> Board/Ships/Ship
 } Ships;
 
 // Board definition (Imagine two grids stacked, one visible and the other is used for logic)
