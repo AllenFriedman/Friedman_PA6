@@ -83,11 +83,11 @@ Ship init_destroyer(void){
 // Inits all ships for a board
 Ships init_ships(void){
     Ships ships = {0};
-    ships.ships[0] = init_carrier();
-    ships.ships[1] = init_battleship();
-    ships.ships[2] = init_cruiser();
-    ships.ships[3] = init_submarine();
-    ships.ships[4] = init_destroyer();
+    ships.ship[0] = init_carrier();
+    ships.ship[1] = init_battleship();
+    ships.ship[2] = init_cruiser();
+    ships.ship[3] = init_submarine();
+    ships.ship[4] = init_destroyer();
     return ships;
 
 }
@@ -108,9 +108,18 @@ Player init_player(const char* name){
 CPU init_cpu(void){
     CPU cpu = {0};
     cpu.board = init_board();
+    random_place_ships(&cpu.board);
     cpu.cpu_logic = SEARCHING;
     cpu.has_won = false;
     return cpu;
+}
+void get_name(char* name){
+    printf("Enter your name: ");
+    if (fgets(name, sizeof(name), stdin) == NULL) {
+        return;
+    }
+
+    name[strcspn(name, "\n")] = '\0';
 }
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]){
@@ -326,6 +335,12 @@ void random_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship) {
     } while(!ship_placed);
     (*ship).row = row + 1;
     (*ship).column = column + 1;
+}
+void random_place_ships(Board* board){
+    for(int i = 0; i < MAX_SHIPS; i++){
+        random_place_ship((*board).hidden_grid,&(*board).ships.ship[i]);
+    }
+
 }
 //simpler get int
 int get_user_int(void) {
