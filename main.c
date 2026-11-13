@@ -25,6 +25,16 @@ int main(void) {
 
     display_board(hidden_grid);
     display_board(visible_grid);
-
+    for(int i = 0; i < 4; i++){
+        printf("(%d, %d), ", (cpu).board.ships.ship[1].rows[i], cpu.board.ships.ship[1].columns[i]);
+    }
+    printf("\n");
+    while(1){
+        attack_board(&cpu.board);
+        clear_screen();
+        display_board(hidden_grid);
+        display_board(visible_grid);
+    }
+    
     return 0;
 }

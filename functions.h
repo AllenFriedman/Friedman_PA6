@@ -1,9 +1,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-//  Size constants
+// Size constants
 #define BOARD_SIZE 10
 #define MAX_SHIPS 5
+
+// Board Characters
+#define WATER_CHARACTER '-';
+#define UNKNOWN_HIT_CHARACTER 'X'
+#define MISS_CHARACTER 'O'
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -16,6 +22,7 @@ typedef enum {
     SUBMARINE, 
     DESTROYER
 } ship_t;
+
 // CPU logic state machine
 typedef enum{
     SEARCHING,
@@ -31,9 +38,10 @@ typedef struct ship{
     ship_t ship_type;
     int size;
     int hits;
-    int row;
-    int column;
+    int rows[5];
+    int columns[5];
     char symbol;
+    bool sunk;
 } Ship;
 
 typedef struct ships{
@@ -70,13 +78,18 @@ Ships init_ships(void);
 Board init_board(void);
 Player init_player(const char name[20]);
 CPU init_cpu(void);
+void edit_coordinate(int* row, int* column, int new_row, int new_column);
 void get_name(char* name);
+void init_empty_coordinates(int* coordinate, int size);
 void random_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship);
 void random_place_ships(Board* board);
+void reveal_sunk_ships(Board* board);
+void is_sunk(Ships* ships);
+void is_hit(Board* board, int row, int column);
 bool is_won(void);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]);
-void attack_board(char visible_grid[BOARD_SIZE][BOARD_SIZE], char hidden_grid[BOARD_SIZE][BOARD_SIZE]);
+void attack_board(Board* board);
 void random_attack_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 int decode_character(char character);
 void clear_screen(void);
