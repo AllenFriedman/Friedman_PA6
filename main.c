@@ -19,6 +19,7 @@ int main(void) {
     clear_screen();
     
     CPU cpu = init_cpu();
+    Player player = init_player("Allen");
     char (*hidden_grid)[BOARD_SIZE] = cpu.board.hidden_grid;    
     char (*visible_grid)[BOARD_SIZE] = cpu.board.visible_grid;
     
@@ -29,11 +30,12 @@ int main(void) {
         printf("(%d, %d), ", (cpu).board.ships.ship[1].rows[i], cpu.board.ships.ship[1].columns[i]);
     }
     printf("\n");
-    while(1){
+    while(!cpu.has_won){
         attack_board(&cpu.board);
         clear_screen();
         display_board(hidden_grid);
         display_board(visible_grid);
+        update_winner(&cpu,&player);
     }
     
     return 0;

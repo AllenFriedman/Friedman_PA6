@@ -6,20 +6,6 @@
 #include "functions.h"
 #include <string.h>
 
-// Defines Syntax Tools
-#define RED   "\033[31m"
-#define GREEN "\033[32m"
-#define BLUE "\033[34m"
-#define GRAY  "\033[90m"
-#define BOLD  "\033[1m"
-#define RESET "\033[0m"
-
-// Defines ship sizes
-#define CARRIER_SIZE 5;
-#define BATTLESHIP_SIZE 4;
-#define CRUISER_SIZE 3;
-#define SUBMARINE_SIZE 3;
-#define DESTROYER_SIZE 2;
 
 // Initializes carrier ship
 Ship init_carrier(void){
@@ -129,7 +115,7 @@ void reveal_sunk_ships(Board* board){
         }
     }
 }
-void is_sunk(Ships* ships){
+void update_sunk_status(Ships* ships){
     for(int i = 0; i < MAX_SHIPS; i++){
         int hits = (*ships).ship[i].hits;
         int size = (*ships).ship[i].size;
@@ -139,7 +125,7 @@ void is_sunk(Ships* ships){
         }
     }
 }
-void is_hit(Board* board, int row, int column){
+void register_hit(Board* board, int row, int column){
     char cell = (*board).hidden_grid[row][column];
     if(cell == '~'){
         return;
@@ -183,7 +169,35 @@ void get_name(char* name){
 
     name[strcspn(name, "\n")] = '\0';
 }
-bool is_won(void);
+void update_winner(CPU* cpu, Player* player){
+    bool cpu_winner = true, player_winner = true;
+    for(int i = 0; i < MAX_SHIPS; i++){
+        bool ship_sunk = (*cpu).board.ships.ship[i].sunk;
+        if(!ship_sunk){
+            cpu_winner = false;
+            break;
+        }
+    }
+    if(cpu_winner){
+        (*cpu).has_won = player_winner;
+        return;
+    }
+
+    for(int i = 0; i < MAX_SHIPS; i++){
+        bool ship_sunk = (*player).board.ships.ship[i].sunk;
+        if(!ship_sunk){
+            player_winner = false;
+            break;
+        }
+    }
+    if(player_winner){
+        (*player).has_won = player_winner;
+    }
+}
+bool is_won(CPU cpu, Player player){
+    return cpu.has_won || player.has_won;
+
+}
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]){
     for(int i = 0; i < BOARD_SIZE; i++){
         for(int j = 0; j < BOARD_SIZE; j++){
@@ -238,8 +252,8 @@ void attack_board(Board* board){
     (*board).visible_grid[row][column] = (hidden_grid_cell_character != water) 
     && hidden_grid_cell_character != miss ? unknown_hit : miss;
 
-    is_hit(board, row, column);
-    is_sunk(&(*board).ships);
+    register_hit(board, row, column);
+    update_sunk_status(&(*board).ships);
     reveal_sunk_ships(board);
 
 }
