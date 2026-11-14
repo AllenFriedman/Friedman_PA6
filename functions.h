@@ -90,7 +90,7 @@ typedef struct cpu{
 /*
     Note down the basic Heirarchy between the structures
     ------------------------------------------------------------
-    More_Dependent_Struct --> More_Independent_Struct
+    More_Dependent_Struct --> More_Independent_Struct (Not actual stucts)
 
     Player/CPU --> Board --> Ships --> Ship --> Ship_attributes
             |       |            
@@ -102,6 +102,7 @@ typedef struct cpu{
     The more dependent structs rely on the existence of the independent structs
     As the structs become more independent, they tend to be standalone and specific
     cpu_logic_t is specific to CPU and is an enum or state-machine used to determine the CPU's game strategy
+    PS: OOP would've made this easier
 */
 
 Ship init_carrier(void);
@@ -125,7 +126,7 @@ void reveal_sunk_ships(Board* board);
 void update_sunk_status(Ships* ships);
 void register_hit(Board* board, int row, int column);
 void update_winner(CPU* cpu, Player* player);
-void display_winnners_message(CPU cpu, Player )
+void display_winnners_message(CPU cpu, Player player);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void attack_board(Board* board);
@@ -135,6 +136,8 @@ void run(void);
 void clear_screen(void);
 void print_menu_choices(void);
 void print_table(void);
+void player_turn(Board* board);
+
 
 int get_user_int(void);
 int decode_character(char character);
