@@ -92,6 +92,7 @@ Ships init_ships(void){
 Player init_player(const char* name){
     Player player = {0};
     player.board = init_board();
+    random_place_ships(&player.board);
     strcpy(player.name, name);
     player.has_won = false;
     return player;
@@ -102,7 +103,43 @@ CPU init_cpu(void){
     random_place_ships(&cpu.board);
     cpu.cpu_logic = SEARCHING;
     cpu.has_won = false;
+    cpu.last_recorded_row_shot = -1;
+    cpu.last_recored_column_shot = -1;
     return cpu;
+}
+void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
+    int player_turn_counter = 1, cpu_turn_counter = 1;
+    while(!((*cpu).has_won || (*player).has_won)){
+    switch(*turn){
+        case PLAYER_TURN:
+        printf("Player turn %d\n", player_turn_counter);
+        display_board((*cpu).board.visible_grid);
+        attack_board(&(*cpu).board);
+        display_board((*cpu).board.visible_grid);
+        printf("Press enter to continue...");
+        getchar();
+        player_turn_counter++;
+        *turn = CPU_TURN;
+        break;
+
+        case CPU_TURN:
+        printf("CPU turn %d\n", cpu_turn_counter);
+        random_attack_board(&(*player).board);
+        display_board((*player).board.visible_grid);
+        update_winner(cpu, player);
+        printf("Press enter to continue...\n%d\n", (int)(*cpu).has_won);
+        //getchar();
+        cpu_turn_counter++;
+        //*turn = PLAYER_TURN;
+        break;
+    }
+}
+}
+void player_turn(Board* board){
+
+}
+void cpu_turn(Board* board){
+
 }
 void reveal_sunk_ships(Board* board){
     for(int i = 0; i < MAX_SHIPS; i++){
@@ -172,26 +209,26 @@ void get_name(char* name){
 void update_winner(CPU* cpu, Player* player){
     bool cpu_winner = true, player_winner = true;
     for(int i = 0; i < MAX_SHIPS; i++){
-        bool ship_sunk = (*cpu).board.ships.ship[i].sunk;
+        bool ship_sunk = (*player).board.ships.ship[i].sunk;
         if(!ship_sunk){
             cpu_winner = false;
             break;
         }
     }
     if(cpu_winner){
-        (*cpu).has_won = player_winner;
+        (*cpu).has_won = true;
         return;
     }
 
     for(int i = 0; i < MAX_SHIPS; i++){
-        bool ship_sunk = (*player).board.ships.ship[i].sunk;
+        bool ship_sunk = (*cpu).board.ships.ship[i].sunk;
         if(!ship_sunk){
             player_winner = false;
             break;
         }
     }
     if(player_winner){
-        (*player).has_won = player_winner;
+        (*player).has_won = true;
     }
 }
 bool is_won(CPU cpu, Player player){
@@ -295,20 +332,34 @@ void display_board(char grid[BOARD_SIZE][BOARD_SIZE]){
         printf("\n");
     }
 }
-void random_attack_board(char grid[BOARD_SIZE][BOARD_SIZE]){
+void random_attack_board(CPU* cpu){
     char water = WATER_CHARACTER;
     char unknown_hit = UNKNOWN_HIT_CHARACTER;
     char miss = MISS_CHARACTER;
     int row = 0, column = 0;
+    char (*hidden_grid)[BOARD_SIZE] = (*cpu).board.hidden_grid;
+    char (*visible_grid)[BOARD_SIZE] = (*cpu).board.hidden_grid;
+
 
         do{
             row = rand() % BOARD_SIZE;
             column = rand() % BOARD_SIZE;
 
-        } while(grid[row][column] != water && grid[row][column] != unknown_hit);
+        } while(visible_grid[row][column] != water);
 
         
-        grid[row][column] = miss;
+    visible_grid[row][column] = (hidden_grid[row][column] == water) ? miss : unknown_hit;
+    (*cpu).last_recorded_row_shot = row;
+    (*cpu).last_recorded_column_shot = column;
+    register_hit(&(*cpu).board, row, column);
+    update_sunk_status(&(*cpu).board.ships);
+    reveal_sunk_ships(&(*cpu).board);
+}
+void cpu_attack_board(Board* board, cpu_logic_t* logic){
+    switch(*logic){
+        case SEARCHING:
+        random_attack_board(board);
+    }
 }
 void edit_coordinate(int* row, int* column, int new_row, int new_column){
     *row = new_row;

@@ -49,6 +49,11 @@ typedef enum{
     REVERSE_FROM_ORIGIN
 } cpu_logic_t;
 
+typedef enum{
+    PLAYER_TURN,
+    CPU_TURN
+} whose_turn_t;
+
 // Ship definition
 typedef struct ship{
     ship_t ship_type;
@@ -84,7 +89,11 @@ typedef struct cpu{
     Board board;
     cpu_logic_t cpu_logic;
     bool has_won;
+    int last_recorded_row_shot;
+    int last_recored_column_shot;
 } CPU;
+
+
 
 // Every init
 /*
@@ -117,6 +126,8 @@ CPU init_cpu(void);
 
 
 // void functions
+void play_turns(Player* player, CPU* cpu, whose_turn_t* turn);
+void cpu_attack_board(Board* board, cpu_logic_t* logic);
 void edit_coordinate(int* row, int* column, int new_row, int new_column);
 void get_name(char* name);
 void init_empty_coordinates(int* coordinate, int size);
@@ -130,13 +141,14 @@ void display_winnners_message(CPU cpu, Player player);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void attack_board(Board* board);
-void random_attack_board(char grid[BOARD_SIZE][BOARD_SIZE]);
+void random_attack_board(Board* board);
 void play_turn(Player* player, int round);
 void run(void);
 void clear_screen(void);
 void print_menu_choices(void);
 void print_table(void);
 void player_turn(Board* board);
+void cpu_turn(Board* board);
 
 
 int get_user_int(void);
