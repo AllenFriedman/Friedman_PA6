@@ -103,8 +103,6 @@ CPU init_cpu(void){
     random_place_ships(&cpu.board);
     cpu.cpu_logic = SEARCHING;
     cpu.has_won = false;
-    cpu.last_recorded_row_shot = -1;
-    cpu.last_recored_column_shot = -1;
     return cpu;
 }
 void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
@@ -112,34 +110,38 @@ void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
     while(!((*cpu).has_won || (*player).has_won)){
     switch(*turn){
         case PLAYER_TURN:
-        printf("Player turn %d\n", player_turn_counter);
-        display_board((*cpu).board.visible_grid);
-        attack_board(&(*cpu).board);
-        display_board((*cpu).board.visible_grid);
-        printf("Press enter to continue...");
+        printf(UNDERLINE"Player turn %d:\n\n"RESET, player_turn_counter);
+        player_turn(&(*cpu).board);
+        update_winner(cpu, player);
+        printf("\nPress enter to continue...");
         getchar();
+        clear_screen();
         player_turn_counter++;
         *turn = CPU_TURN;
         break;
 
         case CPU_TURN:
-        printf("CPU turn %d\n", cpu_turn_counter);
-        random_attack_board(&(*player).board);
-        display_board((*player).board.visible_grid);
+        printf(UNDERLINE"CPU turn %d:\n\n"RESET, cpu_turn_counter);
+        cpu_turn(&(*player).board);
         update_winner(cpu, player);
-        printf("Press enter to continue...\n%d\n", (int)(*cpu).has_won);
-        //getchar();
+
+        printf("\nPress enter to continue...");
+        getchar();
+        clear_screen();
         cpu_turn_counter++;
-        //*turn = PLAYER_TURN;
+        *turn = PLAYER_TURN;
         break;
     }
 }
 }
 void player_turn(Board* board){
-
+    display_board((*board).visible_grid);
+    attack_board((board));
+    display_board((*board).visible_grid);
 }
 void cpu_turn(Board* board){
-
+    random_attack_board(board);
+    display_board((*board).visible_grid);
 }
 void reveal_sunk_ships(Board* board){
     for(int i = 0; i < MAX_SHIPS; i++){
@@ -263,7 +265,7 @@ void attack_board(Board* board){
         }
         char extra = '\0';
         if(sscanf(buffer,"%d %c %c", &row, &encoded_column, &extra) != 2){
-                printf("Invalid cell, enter the coordinates in the proper format: ");
+                printf("\nInvalid cell, enter the coordinates in the proper format: ");
                 continue;
             }
         is_row_valid =  (row > 0 && row <= BOARD_SIZE);
@@ -332,13 +334,13 @@ void display_board(char grid[BOARD_SIZE][BOARD_SIZE]){
         printf("\n");
     }
 }
-void random_attack_board(CPU* cpu){
+void random_attack_board(Board* board){
     char water = WATER_CHARACTER;
     char unknown_hit = UNKNOWN_HIT_CHARACTER;
     char miss = MISS_CHARACTER;
     int row = 0, column = 0;
-    char (*hidden_grid)[BOARD_SIZE] = (*cpu).board.hidden_grid;
-    char (*visible_grid)[BOARD_SIZE] = (*cpu).board.hidden_grid;
+    char (*hidden_grid)[BOARD_SIZE] = (*board).hidden_grid;
+    char (*visible_grid)[BOARD_SIZE] = (*board).visible_grid;
 
 
         do{
@@ -349,17 +351,10 @@ void random_attack_board(CPU* cpu){
 
         
     visible_grid[row][column] = (hidden_grid[row][column] == water) ? miss : unknown_hit;
-    (*cpu).last_recorded_row_shot = row;
-    (*cpu).last_recorded_column_shot = column;
-    register_hit(&(*cpu).board, row, column);
-    update_sunk_status(&(*cpu).board.ships);
-    reveal_sunk_ships(&(*cpu).board);
-}
-void cpu_attack_board(Board* board, cpu_logic_t* logic){
-    switch(*logic){
-        case SEARCHING:
-        random_attack_board(board);
-    }
+
+    register_hit(board, row, column);
+    update_sunk_status(&(*board).ships);
+    reveal_sunk_ships(board);
 }
 void edit_coordinate(int* row, int* column, int new_row, int new_column){
     *row = new_row;

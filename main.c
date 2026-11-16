@@ -27,10 +27,7 @@ int main(void) {
     
 
     
-    for(int i = 0; i < 4; i++){
-        printf("(%d, %d), ", (cpu).board.ships.ship[1].rows[i], cpu.board.ships.ship[1].columns[i]);
-    }
-    printf("\n");
+    
     play_turns(&player, &cpu, &turn);
     
     return 0;

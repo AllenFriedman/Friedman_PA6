@@ -18,6 +18,7 @@
 #define BLUE "\033[34m" // Blue color
 #define GRAY  "\033[90m" // Gray color
 #define BOLD  "\033[1m" // Bold font
+#define UNDERLINE "\033[4m" // Underline font
 #define RESET "\033[0m" // Used to reset adjustments to the print syntax
 
 // Defines ship sizes
@@ -43,7 +44,6 @@ typedef enum {
 // CPU logic state machine
 typedef enum{
     SEARCHING,
-    FOUND_SHIP,
     DETERMINING_DIRECTION,
     FOLLOW_DIRECTION,
     REVERSE_FROM_ORIGIN
@@ -52,6 +52,7 @@ typedef enum{
 typedef enum{
     PLAYER_TURN,
     CPU_TURN
+    
 } whose_turn_t;
 
 // Ship definition
@@ -91,6 +92,8 @@ typedef struct cpu{
     bool has_won;
     int last_recorded_row_shot;
     int last_recored_column_shot;
+    int origin_row;
+    int origin_column;
 } CPU;
 
 
@@ -127,7 +130,6 @@ CPU init_cpu(void);
 
 // void functions
 void play_turns(Player* player, CPU* cpu, whose_turn_t* turn);
-void cpu_attack_board(Board* board, cpu_logic_t* logic);
 void edit_coordinate(int* row, int* column, int new_row, int new_column);
 void get_name(char* name);
 void init_empty_coordinates(int* coordinate, int size);
