@@ -92,7 +92,7 @@ Ships init_ships(void){
 Player init_player(const char* name){
     Player player = {0};
     player.board = init_board();
-    random_place_ships(&player.board);
+    manual_place_ships(&player.board);    
     strcpy(player.name, name);
     player.has_won = false;
     return player;
@@ -105,13 +105,247 @@ CPU init_cpu(void){
     cpu.has_won = false;
     return cpu;
 }
-void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
+
+void manual_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship) {
+    char buffer[50] = "";
+    char encoded_column = '\0';
+    char extra = '\0';
+    char water = WATER_CHARACTER;
+
+    int row = 0, column = 0, direction = 0;
+    bool ship_placed = false;
+    bool collision = false;
+    bool is_row_valid = false, is_column_valid = false;
+
+    do {
+        printf("Enter starting coordinate for ship (example 4A): ");
+
+        if(fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            return;
+        }
+
+        if(sscanf(buffer, "%d %c %c", &row, &encoded_column, &extra) != 2) {
+            printf("Invalid coordinate format.\n");
+            continue;
+        }
+
+        is_row_valid = (row > 0 && row <= BOARD_SIZE);
+        is_column_valid = (encoded_column >= 'A' && encoded_column <= 'J') ||
+                          (encoded_column >= 'a' && encoded_column <= 'j');
+
+        if(!(is_row_valid && is_column_valid)) {
+            printf("Invalid row or column.\n");
+            continue;
+        }
+
+        column = decode_character(encoded_column);
+        row--;
+
+        printf("Choose direction (1 = right, 2 = down, 3 = left, 4 = up): ");
+
+        if(fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            return;
+        }
+
+        extra = '\0';
+        if(sscanf(buffer, "%d %c", &direction, &extra) != 1 ||
+           direction < 1 || direction > 4) {
+            printf("Invalid direction.\n");
+            continue;
+        }
+
+        collision = false;
+
+        switch(direction) {
+
+            // right
+            case 1:
+                if(column + (*ship).size <= BOARD_SIZE) {
+
+                    for(int i = 0; i < (*ship).size; i++) {
+                        if(hidden_grid[row][column + i] != water) {
+                            collision = true;
+                            break;
+                        }
+                    }
+
+                    if(!collision) {
+                        for(int i = 0; i < (*ship).size; i++) {
+                            hidden_grid[row][column + i] = (*ship).symbol;
+                            edit_coordinate(&(*ship).rows[i], &(*ship).columns[i], row, column + i);
+                        }
+                        ship_placed = true;
+                    }
+                }
+                break;
+
+            // down
+            case 2:
+                if(row + (*ship).size <= BOARD_SIZE) {
+
+                    for(int i = 0; i < (*ship).size; i++) {
+                        if(hidden_grid[row + i][column] != water) {
+                            collision = true;
+                            break;
+                        }
+                    }
+
+                    if(!collision) {
+                        for(int i = 0; i < (*ship).size; i++) {
+                            hidden_grid[row + i][column] = (*ship).symbol;
+                            edit_coordinate(&(*ship).rows[i], &(*ship).columns[i], row + i, column);
+                        }
+                        ship_placed = true;
+                    }
+                }
+                break;
+
+            // left
+            case 3:
+                if(column - ((*ship).size - 1) >= 0) {
+
+                    for(int i = 0; i < (*ship).size; i++) {
+                        if(hidden_grid[row][column - i] != water) {
+                            collision = true;
+                            break;
+                        }
+                    }
+
+                    if(!collision) {
+                        for(int i = 0; i < (*ship).size; i++) {
+                            hidden_grid[row][column - i] = (*ship).symbol;
+                            edit_coordinate(&(*ship).rows[i], &(*ship).columns[i], row, column - i);
+                        }
+                        ship_placed = true;
+                    }
+                }
+                break;
+
+            // up
+            case 4:
+                if(row - ((*ship).size - 1) >= 0) {
+
+                    for(int i = 0; i < (*ship).size; i++) {
+                        if(hidden_grid[row - i][column] != water) {
+                            collision = true;
+                            break;
+                        }
+                    }
+
+                    if(!collision) {
+                        for(int i = 0; i < (*ship).size; i++) {
+                            hidden_grid[row - i][column] = (*ship).symbol;
+                            edit_coordinate(&(*ship).rows[i], &(*ship).columns[i], row - i, column);
+                        }
+                        ship_placed = true;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        if(!ship_placed) {
+            printf("Cannot place ship here. It overlaps another ship or goes out of bounds.\n");
+        }
+
+    } while(!ship_placed);
+
+    clear_screen();
+    display_board(hidden_grid);
+}
+void manual_place_ships(Board* board) {
+    for(int i = 0; i < MAX_SHIPS; i++) {
+        clear_screen();
+        printf("Place your ship (size %d):\n",
+               (*board).ships.ship[i].size);
+
+        display_board((*board).hidden_grid);
+
+        manual_place_ship((*board).hidden_grid, &(*board).ships.ship[i]);
+    }
+}
+
+void get_name(char* name){
+    printf("Enter your full name: ");
+    if(fgets(name, 100, stdin) == NULL){
+        name[0] = '\0';
+        return;
+    }
+    name[strcspn(name, "\n")] = '\0';
+}
+
+void fprint_stats(FILE* write_log, int hits, int misses, int total_shots){
+    double ratio = misses > 0 ? (100.0 * hits / misses) : 0.0;
+    fprintf(write_log, "Number Hits: %d\n", hits);
+    fprintf(write_log, "Number Misses: %d\n", misses);
+    fprintf(write_log, "Total Shots: %d\n", total_shots);
+    if(misses == 0 && hits > 0){
+        fprintf(write_log, "Hit/Miss Ratio: N/A (no misses)\n");
+    }else{
+        fprintf(write_log, "Hit/Miss Ratio: %.0f%%\n", ratio);
+    }
+}
+
+void count_shots(Board* target, int* hits, int* misses){
+    *hits = 0;
+    *misses = 0;
+    for(int row = 0; row < BOARD_SIZE; row++){
+        for(int column = 0; column < BOARD_SIZE; column++){
+            char visible = target->visible_grid[row][column];
+            if(visible == MISS_CHARACTER){
+                (*misses)++;
+            }else if(visible == UNKNOWN_HIT_CHARACTER ||
+                     (visible != WATER_CHARACTER &&
+                      target->hidden_grid[row][column] != WATER_CHARACTER)){
+                (*hits)++;
+            }
+        }
+    }
+}
+
+void run(void){
+    srand((unsigned int)time(NULL));
+
+    FILE* write_log = fopen("battleship.log", "w");
+    
+
+    char name[100] = "";
+    get_name(name);
+    Player player = init_player(name);
+    CPU cpu = init_cpu();
+    whose_turn_t turn = PLAYER_TURN;
+
+    play_turns(&player, &cpu, &turn, write_log);
+
+    fprintf(write_log, "\nPlayer1 %s, Player2 %s\n",
+            player.has_won ? "wins" : "loses",
+            cpu.has_won ? "wins" : "loses");
+
+    int player_hits = 0, player_misses = 0;
+    int cpu_hits = 0, cpu_misses = 0;
+    count_shots(&cpu.board, &player_hits, &player_misses);
+    count_shots(&player.board, &cpu_hits, &cpu_misses);
+
+    fprintf(write_log, "\n*** Player1 Stats ***\n");
+    fprint_stats(write_log, player_hits, player_misses,
+                 player_hits + player_misses);
+    fprintf(write_log, "\n*** Player2 Stats ***\n");
+    fprint_stats(write_log, cpu_hits, cpu_misses,
+                 cpu_hits + cpu_misses);
+
+    fclose(write_log);
+    printf("Game results saved to battleship.log\n");
+}
+void play_turns(Player* player, CPU* cpu, whose_turn_t* turn, FILE* write_log){
     int player_turn_counter = 1, cpu_turn_counter = 1;
+    *turn = rand() % 2 == 0 ? PLAYER_TURN : CPU_TURN;
     while(!((*cpu).has_won || (*player).has_won)){
     switch(*turn){
         case PLAYER_TURN:
-        printf(UNDERLINE"Player turn %d:\n\n"RESET, player_turn_counter);
-        player_turn(&(*cpu).board);
+        printf(UNDERLINE"%s turn %d:\n\n"RESET,(*player).name ,player_turn_counter);
+        player_turn(&(*cpu).board, write_log);
         update_winner(cpu, player);
         printf("\nPress enter to continue...");
         getchar();
@@ -121,8 +355,11 @@ void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
         break;
 
         case CPU_TURN:
-        printf(UNDERLINE"CPU turn %d:\n\n"RESET, cpu_turn_counter);
-        cpu_turn(&(*player).board);
+        printf(UNDERLINE"CPU turn %d:\n"RESET, cpu_turn_counter);
+        printf("\nPress enter to see the CPU's attack...");
+        getchar();
+        clear_screen();
+        cpu_turn(&(*player).board, write_log);
         update_winner(cpu, player);
 
         printf("\nPress enter to continue...");
@@ -134,13 +371,13 @@ void play_turns(Player* player, CPU* cpu, whose_turn_t* turn){
     }
 }
 }
-void player_turn(Board* board){
+void player_turn(Board* board, FILE* write_log){
     display_board((*board).visible_grid);
-    attack_board((board));
+    attack_board(board, write_log);
     display_board((*board).visible_grid);
 }
-void cpu_turn(Board* board){
-    random_attack_board(board);
+void cpu_turn(Board* board, FILE* write_log){
+    random_attack_board(board, write_log);
     display_board((*board).visible_grid);
 }
 void reveal_sunk_ships(Board* board){
@@ -200,14 +437,6 @@ void init_empty_coordinates(int* coordinate, int size){
         coordinate[i] = -1;
     }
 }
-void get_name(char* name){
-    printf("Enter your name: ");
-    if (fgets(name, sizeof(name), stdin) == NULL) {
-        return;
-    }
-
-    name[strcspn(name, "\n")] = '\0';
-}
 void update_winner(CPU* cpu, Player* player){
     bool cpu_winner = true, player_winner = true;
     for(int i = 0; i < MAX_SHIPS; i++){
@@ -250,7 +479,7 @@ int decode_character(char character){
     return character - 'A';
     
 }
-void attack_board(Board* board){
+void attack_board(Board* board, FILE* write_log){
     int row = 0, column = 0;
     bool is_valid_choice = false, is_row_valid = false, is_column_valid = false, is_repeated_attack = false;
     char encoded_column = '\0', water = WATER_CHARACTER;
@@ -265,7 +494,7 @@ void attack_board(Board* board){
         }
         char extra = '\0';
         if(sscanf(buffer,"%d %c %c", &row, &encoded_column, &extra) != 2){
-                printf("\nInvalid cell, enter the coordinates in the proper format: ");
+                printf("Invalid cell, enter the coordinates in the proper format: ");
                 continue;
             }
         is_row_valid =  (row > 0 && row <= BOARD_SIZE);
@@ -287,12 +516,38 @@ void attack_board(Board* board){
     }while(!is_valid_choice);
 
     char hidden_grid_cell_character = (*board).hidden_grid[row][column];
+    bool is_hit = (hidden_grid_cell_character != water);
+    (*board).visible_grid[row][column] = is_hit ? unknown_hit : miss;
+    if(is_hit){
+        printf(UNDERLINE"%d%c is a hit!\n\n"RESET, row + 1, encoded_column - 32);
+    }
+    else{
+        printf(UNDERLINE"%d%c is not a hit\n\n"RESET, row + 1, encoded_column - 32);
 
-    (*board).visible_grid[row][column] = (hidden_grid_cell_character != water) 
-    && hidden_grid_cell_character != miss ? unknown_hit : miss;
+    }
 
     register_hit(board, row, column);
     update_sunk_status(&(*board).ships);
+
+    if(write_log != NULL){
+        fprintf(write_log, "Player1: %d,%d \"%s\"", row + 1, column + 1,
+                is_hit ? "hit" : "miss");
+        for(int i = 0; i < MAX_SHIPS; i++){
+            Ship* current_ship = &board->ships.ship[i];
+            if(is_hit && current_ship->symbol == hidden_grid_cell_character &&
+               current_ship->sunk){
+                
+                if(current_ship->hits == current_ship->size){
+                    const char* ship_names[] = {
+                        "Carrier", "Battleship", "Cruiser", "Submarine", "Destroyer"
+                    };
+                    fprintf(write_log, " Sunk %s!", ship_names[i]);
+                }
+                break;
+            }
+        }
+        fprintf(write_log, "\n");
+    }
     reveal_sunk_ships(board);
 
 }
@@ -334,7 +589,7 @@ void display_board(char grid[BOARD_SIZE][BOARD_SIZE]){
         printf("\n");
     }
 }
-void random_attack_board(Board* board){
+void random_attack_board(Board* board, FILE* write_log){
     char water = WATER_CHARACTER;
     char unknown_hit = UNKNOWN_HIT_CHARACTER;
     char miss = MISS_CHARACTER;
@@ -349,11 +604,38 @@ void random_attack_board(Board* board){
 
         } while(visible_grid[row][column] != water);
 
-        
-    visible_grid[row][column] = (hidden_grid[row][column] == water) ? miss : unknown_hit;
+    bool is_hit = (hidden_grid[row][column] != water);
+    visible_grid[row][column] = is_hit ? unknown_hit : miss;
+    if(is_hit){
+        printf(UNDERLINE"%d%c is a hit!\n\n"RESET, row + 1, 'A' + column);
+    }
+    else{
+        printf(UNDERLINE"%d%c is not a hit\n\n"RESET, row + 1, 'A' + column);
 
+    }
+    
     register_hit(board, row, column);
     update_sunk_status(&(*board).ships);
+
+    if(write_log != NULL){
+        fprintf(write_log, "Player2: %d,%d \"%s\"", row + 1, column + 1,
+                is_hit ? "hit" : "miss");
+        for(int i = 0; i < MAX_SHIPS; i++){
+            Ship* current_ship = &board->ships.ship[i];
+            if(is_hit && current_ship->symbol == hidden_grid[row][column] &&
+               current_ship->sunk){
+               
+                if(current_ship->hits == current_ship->size){
+                    const char* ship_names[] = {
+                        "Carrier", "Battleship", "Cruiser", "Submarine", "Destroyer"
+                    };
+                    fprintf(write_log, " Sunk %s!", ship_names[i]);
+                }
+                break;
+            }
+        }
+        fprintf(write_log, "\n");
+    }
     reveal_sunk_ships(board);
 }
 void edit_coordinate(int* row, int* column, int new_row, int new_column){
@@ -482,13 +764,7 @@ int get_user_int(void) {
     
 }
 //simpler get char
-char get_user_char(void) {
-    char letter;
-    if (scanf(" %c", &letter) != 1) {
-        exit(0);
-    }
-    return letter;
-}
+
 //clears screen
 void clear_screen(void) {
     printf("\033[2J\033[H");

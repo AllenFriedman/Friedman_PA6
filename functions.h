@@ -129,7 +129,8 @@ CPU init_cpu(void);
 
 
 // void functions
-void play_turns(Player* player, CPU* cpu, whose_turn_t* turn);
+void count_shots(Board* target, int* hits, int* misses);
+void play_turns(Player* player, CPU* cpu, whose_turn_t* turn, FILE* write_log);
 void edit_coordinate(int* row, int* column, int new_row, int new_column);
 void get_name(char* name);
 void init_empty_coordinates(int* coordinate, int size);
@@ -142,15 +143,19 @@ void update_winner(CPU* cpu, Player* player);
 void display_winnners_message(CPU cpu, Player player);
 void set_board(char grid[BOARD_SIZE][BOARD_SIZE]);
 void display_board(char grid[BOARD_SIZE][BOARD_SIZE]);
-void attack_board(Board* board);
-void random_attack_board(Board* board);
+void attack_board(Board* board, FILE* write_log);
+void random_attack_board(Board* board, FILE* write_log);
 void play_turn(Player* player, int round);
 void run(void);
 void clear_screen(void);
 void print_menu_choices(void);
 void print_table(void);
-void player_turn(Board* board);
-void cpu_turn(Board* board);
+void player_turn(Board* board, FILE* write_log);
+void cpu_turn(Board* board, FILE* write_log);
+void manual_place_ship(char hidden_grid[BOARD_SIZE][BOARD_SIZE], Ship* ship);
+void manual_place_ships(Board* board);
+void fprint_stats(FILE* write_log, int hits, int misses, int total_shots);
+void run(void);
 
 
 int get_user_int(void);
@@ -160,6 +165,7 @@ int menu_choice(void);
 bool is_won(CPU cpu, Player player);
 
 char get_user_char(void);
+void get_name(char* name);
 
 
 

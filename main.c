@@ -17,18 +17,7 @@ Lab 9
 int main(void) {
     srand((unsigned int)time(NULL)); //makes random work
     clear_screen();
-    
-    CPU cpu = init_cpu();
-    Player player = init_player("Allen");
-    whose_turn_t turn = PLAYER_TURN;
-    char (*hidden_grid)[BOARD_SIZE] = cpu.board.hidden_grid;    
-    char (*visible_grid)[BOARD_SIZE] = cpu.board.visible_grid;
-    int counter = 0;
-    
-
-    
-    
-    play_turns(&player, &cpu, &turn);
+    run();
     
     return 0;
 }
